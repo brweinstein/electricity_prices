@@ -8,7 +8,7 @@ def fetch_year(year: int) -> pd.DataFrame:
     """Returns columns: timestamp, price (Toronto zone only)"""
     url = PRICE_NODAL_BASE_URL.format(year=year)
     df = pd.read_csv(url, skiprows=4)
-    df["timestamp"] = pd.to_datetime(df["Date"]) + pd.to_timedelta(df["Hour"] - 1)
+    df["timestamp"] = pd.to_datetime(df["Date"]) + pd.to_timedelta(df["Hour"] - 1, unit="h")
     toronto = df[["timestamp", "Darlington"]].rename(columns={"Darlington": "price_toronto"})
     return toronto
 

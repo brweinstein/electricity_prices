@@ -1,4 +1,4 @@
-# backend/main.py
+# main.py
 
 import pandas as pd
 from app.data.fetch import fetch_all_years

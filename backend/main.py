@@ -1,16 +1,11 @@
-# main.py
+from fastapi import FastAPI
+from app.api import prices, recommendation
 
-import pandas as pd
-from app.data.fetch import fetch_all_years
-from app.data.cache import load_prices
-from app.models.seasonality import hourly_baseline, dow_hourly_baseline, weekday_vs_weekend_baseline
+app = FastAPI(title="When Should I Use Electricity?")
 
-def main():
-    df = load_prices()
-    print(df.describe())
+app.include_router(prices.router)
+app.include_router(recommendation.router)
 
-    print(hourly_baseline(df))
-    print(weekday_vs_weekend_baseline(df))
-
-if __name__ == '__main__':
-    main()
+@app.get("/")
+def root():
+    return {"status": "ok"}

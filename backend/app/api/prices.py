@@ -8,5 +8,5 @@ router = APIRouter()
 @router.get("/prices/history")
 def get_price_history(start: str | None = None, end: str | None = None):
     """Returns cached historical prices"""
-    df = load_prices(start if start else "", end if end else "")
+    df = load_prices(start, end)
     return df.to_dict(orient="records")

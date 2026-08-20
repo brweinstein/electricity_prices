@@ -8,7 +8,7 @@ class RecommendationResponse(BaseModel):
     deviation_pct: float
     current_price: float
     typical_price: float
-    is_weekend: float
+    is_weekend: bool
     hour: int
 
 class PriceHistoryPoint(BaseModel):

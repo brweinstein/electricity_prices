@@ -1,5 +1,12 @@
+# backend
 venv/
 links.md
 __pycache__/
 *.db
-frontend/.env.local
+
+# frontend
+.env.local
+.next/
+node_modules/
+next-env.d.ts
+package-lock.json

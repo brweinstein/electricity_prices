@@ -11,8 +11,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(prices.router)
-app.include_router(recommendation.router)
+app.include_router(prices.router, prefix="/api")
+app.include_router(recommendation.router, prefix="/api")
 
 @app.get("/")
 def root():

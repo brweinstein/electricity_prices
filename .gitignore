@@ -2,7 +2,6 @@
 venv/
 links.md
 __pycache__/
-*.db
 
 # frontend
 .env.local

@@ -44,3 +44,31 @@ def recommend(current_price: float,
         "is_weekend": bool(is_weekend),
         "hour": hour,
     }
+
+def forecast_window(start: pd.Timestamp,
+                    window_hours: int,
+                    baseline: pd.DataFrame) -> dict:
+    """Estimate each hour in a future window from the seasonal baseline."""
+    timestamps = [start + pd.Timedelta(hours=offset) for offset in range(window_hours)]
+    estimates = [
+        round(_get_typical(baseline, timestamp.hour, timestamp.dayofweek >= 5), 2)
+        for timestamp in timestamps
+    ]
+    average = sum(estimates) / len(estimates)
+    recommendation = recommend(average, start, baseline)
+
+    return {
+        "start_time": start.isoformat(),
+        "end_time": timestamps[-1].isoformat(),
+        "window_hours": window_hours,
+        "estimates": [
+            {"timestamp": timestamp.isoformat(), "price": price}
+            for timestamp, price in zip(timestamps, estimates)
+        ],
+        "average_price": round(average, 2),
+        "lowest_price": min(estimates),
+        "highest_price": max(estimates),
+        "action": recommendation["action"],
+        "deviation_pct": recommendation["deviation_pct"],
+        "typical_price": recommendation["typical_price"],
+    }

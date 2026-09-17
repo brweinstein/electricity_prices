@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	.theme-control {
+		color-scheme: dark;
+		accent-color: #4fd1ae;
+	}
+
+	.theme-control option {
+		background: #171d1a;
+		color: #e8ece9;
+	}
+}

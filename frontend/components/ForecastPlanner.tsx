@@ -2,13 +2,15 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { Forecast, getForecast } from "@/lib/api";
+import { Forecast, formatOntarioTimestamp, getForecast } from "@/lib/api";
 
 const ACTION_LABEL: Record<string, string> = {
   "good time to use electricity": "Good window to use power",
   "wait if you can": "Consider waiting",
   "about average right now": "About average",
 };
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function nextHour() {
   const date = new Date();
@@ -70,7 +72,7 @@ export default function ForecastPlanner() {
           <div className="mt-2 grid grid-cols-4 gap-2">
             <select aria-label="Month" className="theme-control min-w-0 border border-hairline bg-transparent px-2 py-2 text-sm text-ink outline-none focus:border-cheap" value={dateParts.month} onChange={(event) => setDateParts({ ...dateParts, month: event.target.value })} required>
               <option value="">Month</option>
-              {Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{new Date(2000, index).toLocaleString("en-CA", { month: "short" })}</option>)}
+              {MONTH_NAMES.map((month, index) => <option key={index + 1} value={index + 1}>{month}</option>)}
             </select>
             <select aria-label="Day" className="theme-control min-w-0 border border-hairline bg-transparent px-2 py-2 text-sm text-ink outline-none focus:border-cheap" value={dateParts.day} onChange={(event) => setDateParts({ ...dateParts, day: event.target.value })} required>
               <option value="">Day</option>
@@ -145,9 +147,9 @@ export default function ForecastPlanner() {
           <div className="mt-5 h-40 border border-hairline px-2 py-3">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={forecast.estimates}>
-                <XAxis dataKey="timestamp" tickFormatter={(value) => new Date(value).toLocaleTimeString("en-CA", { hour: "numeric" })} stroke="#8A948F" fontSize={10} tickLine={false} axisLine={false} minTickGap={24} />
+                <XAxis dataKey="timestamp" tickFormatter={(value) => formatOntarioTimestamp(value, { hour: "numeric" })} stroke="#8A948F" fontSize={10} tickLine={false} axisLine={false} minTickGap={24} />
                 <YAxis stroke="#8A948F" fontSize={10} tickLine={false} axisLine={false} width={44} tickFormatter={(value) => `$${value}`} />
-                <Tooltip contentStyle={{ background: "#171D1A", border: "1px solid #2A322E", fontSize: 11 }} labelFormatter={(value) => new Date(value).toLocaleString("en-CA", { weekday: "short", hour: "numeric" })} formatter={(value) => [`$${Number(value).toFixed(1)}/MWh`, "Estimated"]} />
+                <Tooltip contentStyle={{ background: "#171D1A", border: "1px solid #2A322E", fontSize: 11 }} labelFormatter={(value) => formatOntarioTimestamp(value, { weekday: "short", hour: "numeric" })} formatter={(value) => [`$${Number(value).toFixed(1)}/MWh`, "Estimated"]} />
                 <Line type="monotone" dataKey="price" stroke="#4FD1AE" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -157,7 +159,7 @@ export default function ForecastPlanner() {
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               {forecast.best_hours.map((hour) => (
                 <div className="border border-hairline px-3 py-2" key={hour.timestamp}>
-                  <p className="text-sm text-ink">{new Date(hour.timestamp).toLocaleString("en-CA", { weekday: "short", hour: "numeric" })}</p>
+                  <p className="text-sm text-ink">{formatOntarioTimestamp(hour.timestamp, { weekday: "short", hour: "numeric" })}</p>
                   <p className="mt-1 font-mono text-sm text-cheap">${hour.price.toFixed(1)}/MWh</p>
                 </div>
               ))}

@@ -1,12 +1,12 @@
 "use client";
 
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { PricePoint } from "@/lib/api";
+import { formatOntarioTimestamp, PricePoint } from "@/lib/api";
 
 export default function PriceChart({ data }: { data: PricePoint[] }) {
   const formatted = data.map((d) => ({
-    time: new Date(d.timestamp).toLocaleDateString("en-CA", { month: "short", day: "numeric" }),
-    fullTime: new Date(d.timestamp).toLocaleString("en-CA", {
+    time: formatOntarioTimestamp(d.timestamp, { month: "short", day: "numeric" }),
+    fullTime: formatOntarioTimestamp(d.timestamp, {
       weekday: "short",
       month: "short",
       day: "numeric",

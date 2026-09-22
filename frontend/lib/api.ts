@@ -6,6 +6,14 @@ function getApiBase(): string {
 
 const API_BASE = getApiBase();
 
+export function formatOntarioTimestamp(
+  timestamp: string,
+  options: Intl.DateTimeFormatOptions,
+): string {
+  const date = new Date(/[zZ]|[+-]\d\d:\d\d$/.test(timestamp) ? timestamp : `${timestamp}Z`);
+  return new Intl.DateTimeFormat("en-CA", { ...options, timeZone: "UTC" }).format(date);
+}
+
 export interface Recommendation {
   action: string;
   deviation_pct: number;

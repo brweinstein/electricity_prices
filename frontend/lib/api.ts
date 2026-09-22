@@ -25,17 +25,24 @@ export interface ForecastPoint {
   price: number;
 }
 
+export interface BestHour {
+  timestamp: string;
+  price: number;
+}
+
 export interface Forecast {
   start_time: string;
   end_time: string;
   window_hours: number;
   estimates: ForecastPoint[];
+  best_hours: BestHour[];
   average_price: number;
   lowest_price: number;
   highest_price: number;
   action: string;
   deviation_pct: number;
   typical_price: number;
+  model: string;
 }
 
 export async function getRecommendation(currentPrice: number): Promise<Recommendation> {

@@ -15,17 +15,23 @@ class ForecastPoint(BaseModel):
     timestamp: str
     price: float
 
+class BestHour(BaseModel):
+    timestamp: str
+    price: float
+
 class ForecastResponse(BaseModel):
     start_time: str
     end_time: str
     window_hours: int
     estimates: list[ForecastPoint]
+    best_hours: list[BestHour]
     average_price: float
     lowest_price: float
     highest_price: float
     action: str
     deviation_pct: float
     typical_price: float
+    model: str = "seasonal median"
 
 class PriceHistoryPoint(BaseModel):
     """A single timestamped price observation"""

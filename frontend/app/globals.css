@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes estimate-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.estimate-spinner {
+	width: 1.25rem;
+	height: 1.25rem;
+	flex: 0 0 auto;
+	border: 2px solid #2a322e;
+	border-top-color: #4fd1ae;
+	border-radius: 9999px;
+	animation: estimate-spin 0.8s linear infinite;
+}
+
+.forecast-length-input {
+	-moz-appearance: textfield;
+}
+
+.forecast-length-input::-webkit-inner-spin-button,
+.forecast-length-input::-webkit-outer-spin-button {
+	margin: 0;
+	-webkit-appearance: none;
+}
+
 @layer base {
 	.theme-control {
 		color-scheme: dark;

@@ -1,14 +1,24 @@
 # app/models/forecast.py
 
 from typing import cast
+
+import numpy as np
 import pandas as pd
 
-def _get_typical(baseline: pd.DataFrame, hour: int, is_weekend: bool) -> float:
+def _get_typical(
+    baseline: pd.DataFrame,
+    hour: int,
+    is_weekend: bool,
+    month: int | None = None,
+) -> float:
     """Look up the typical price for a given hour and day-type"""
-    value = baseline.loc[hour, is_weekend]
-    if not isinstance(value, (int, float)):
+    key = (month, hour) if isinstance(baseline.index, pd.MultiIndex) else hour
+    value = baseline.loc[key, is_weekend]
+    if pd.isna(value):
+        value = baseline.loc[key].dropna().median()
+    if not isinstance(value, (int, float, np.number)) or pd.isna(value):
         raise TypeError(f"Expected numeric baseline value, got {type(value)}: {value}")
-    return cast(float, value)
+    return float(cast(float, value))
 
 def current_deviation(current_price: float,
                       timestamp: pd.Timestamp,
@@ -16,7 +26,7 @@ def current_deviation(current_price: float,
     """% deviation from the typical price for this hour/day-type"""
     is_weekend = timestamp.dayofweek >= 5
     hour = timestamp.hour
-    typical = _get_typical(baseline, hour, is_weekend)
+    typical = _get_typical(baseline, hour, is_weekend, timestamp.month)
     return (current_price - typical) / typical * 100
 
 def recommend(current_price: float,
@@ -26,7 +36,7 @@ def recommend(current_price: float,
     """Return a recommendation based on how current price deviates from the seasonal baseline."""
     is_weekend = timestamp.dayofweek >= 5
     hour = timestamp.hour
-    typical = _get_typical(baseline, hour, is_weekend)
+    typical = _get_typical(baseline, hour, is_weekend, timestamp.month)
     deviation = (current_price - typical) / typical * 100
 
     if deviation <= -threshold:
@@ -51,9 +61,13 @@ def forecast_window(start: pd.Timestamp,
     """Estimate each hour in a future window from the seasonal baseline."""
     timestamps = [start + pd.Timedelta(hours=offset) for offset in range(window_hours)]
     estimates = [
-        round(_get_typical(baseline, timestamp.hour, timestamp.dayofweek >= 5), 2)
+        round(_get_typical(baseline, timestamp.hour, timestamp.dayofweek >= 5, timestamp.month), 2)
         for timestamp in timestamps
     ]
+    ranked_hours = sorted(
+        zip(timestamps, estimates),
+        key=lambda item: (item[1], item[0]),
+    )[:3]
     average = sum(estimates) / len(estimates)
     recommendation = recommend(average, start, baseline)
 
@@ -64,6 +78,10 @@ def forecast_window(start: pd.Timestamp,
         "estimates": [
             {"timestamp": timestamp.isoformat(), "price": price}
             for timestamp, price in zip(timestamps, estimates)
+        ],
+        "best_hours": [
+            {"timestamp": timestamp.isoformat(), "price": price}
+            for timestamp, price in ranked_hours
         ],
         "average_price": round(average, 2),
         "lowest_price": min(estimates),

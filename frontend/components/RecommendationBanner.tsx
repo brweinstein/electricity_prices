@@ -25,7 +25,7 @@ export default function RecommendationBanner({ data }: { data: Recommendation })
         <span className={`font-mono text-6xl tabular-nums sm:text-7xl ${accent}`}>
           {data.current_price.toFixed(1)}
         </span>
-        <span className="pb-2 text-sm text-muted">¢/kWh</span>
+        <span className="pb-2 text-sm text-muted">$/MWh</span>
       </div>
 
       <p className={`mt-2 text-lg font-medium ${accent}`}>

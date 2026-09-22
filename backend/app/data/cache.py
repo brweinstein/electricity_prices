@@ -8,9 +8,15 @@ def load_prices(start: str | None = None, end: str | None = None) -> pd.DataFram
     conn = sqlite3.connect(DB_PATH)
     query = "SELECT * FROM prices"
     params = []
-    if start and end:
-        query += " WHERE timestamp BETWEEN ? AND ?"
-        params = [start, end]
+    filters = []
+    if start:
+        filters.append("timestamp >= ?")
+        params.append(start)
+    if end:
+        filters.append("timestamp <= ?")
+        params.append(end)
+    if filters:
+        query += " WHERE " + " AND ".join(filters)
     df = pd.read_sql(query, conn, params=params, parse_dates=["timestamp"])
     conn.close()
     return df.sort_values("timestamp").reset_index(drop=True)

@@ -19,4 +19,15 @@ def weekday_vs_weekend_baseline(df: pd.DataFrame) -> pd.DataFrame:
     """Median price by (is_weekend, hour)"""
     is_weekend = df["timestamp"].dt.dayofweek >= 5
     hour = df["timestamp"].dt.hour
-    return df.groupby([is_weekend, hour])["price_toronto"].median().unstack(level=0)
+    baseline = df.groupby([is_weekend, hour])["price_toronto"].median().unstack(level=0)
+    return baseline.reindex(index=range(24), columns=[False, True])
+
+
+def monthly_weekday_vs_weekend_baseline(df: pd.DataFrame) -> pd.DataFrame:
+    """Median price by (month, hour, weekday/weekend)."""
+    month = df["timestamp"].dt.month
+    is_weekend = df["timestamp"].dt.dayofweek >= 5
+    hour = df["timestamp"].dt.hour
+    baseline = df.groupby([month, hour, is_weekend])["price_toronto"].median().unstack(level=2)
+    index = pd.MultiIndex.from_product([range(1, 13), range(24)], names=["month", "hour"])
+    return baseline.reindex(index=index, columns=[False, True])

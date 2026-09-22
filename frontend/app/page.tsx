@@ -1,20 +1,11 @@
-import RecommendationBanner from "@/components/RecommendationBanner";
 import PriceChart from "@/components/PriceChart";
 import RegionSelector from "@/components/RegionSelector";
 import ForecastPlanner from "@/components/ForecastPlanner";
-import { getForecast, getRecommendation } from "@/lib/api";
+import { getPriceHistory } from "@/lib/api";
 
 export default async function Home() {
-  const placeholderPrice = 18.4; // stand-in until a live price feed replaces this
-
-  const start = new Date();
-  start.setMinutes(0, 0, 0);
-  start.setHours(start.getHours() + 1);
-
-  const [recommendation, history] = await Promise.all([
-    getRecommendation(placeholderPrice),
-    getForecast(start.toISOString(), 168),
-  ]);
+  const allHistory = await getPriceHistory();
+  const history = allHistory.slice(-168);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
@@ -24,9 +15,8 @@ export default async function Home() {
       </header>
       <div className="space-y-4">
         <RegionSelector />
-        <RecommendationBanner data={recommendation} />
+        <PriceChart data={history} />
         <ForecastPlanner />
-        <PriceChart data={history.estimates} />
       </div>
     </main>
   );

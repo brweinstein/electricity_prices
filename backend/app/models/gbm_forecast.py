@@ -144,7 +144,7 @@ class ResidualGBMForecaster:
         return valid
 
     def forecast(self, start: pd.Timestamp, window_hours: int) -> dict:
-        working = self.history.copy()
+        working = self.history.tail(168).copy()
         estimates = []
         for offset in range(window_hours):
             timestamp = start + pd.Timedelta(hours=offset)
@@ -156,7 +156,7 @@ class ResidualGBMForecaster:
             working = pd.concat(
                 [working, pd.DataFrame({"timestamp": [timestamp], "price_toronto": [price]})],
                 ignore_index=True,
-            )
+            ).tail(168)
 
         prices = [item["price"] for item in estimates]
         ranked_hours = sorted(estimates, key=lambda item: (item["price"], item["timestamp"]))[:3]

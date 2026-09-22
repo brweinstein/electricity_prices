@@ -5,8 +5,7 @@ from functools import lru_cache
 import pandas as pd
 from app.data.cache import load_prices
 from app.models.seasonality import monthly_weekday_vs_weekend_baseline
-from app.models.forecast import recommend
-from app.models.gbm_forecast import ResidualGBMForecaster
+from app.models.forecast import forecast_window, recommend
 from app.schemas import ForecastResponse, RecommendationResponse
 
 router = APIRouter()
@@ -18,7 +17,9 @@ def normalize_forecast_timestamp(timestamp: pd.Timestamp) -> pd.Timestamp:
     return timestamp
 
 @lru_cache(maxsize=1)
-def get_forecaster() -> ResidualGBMForecaster:
+def get_forecaster():
+    from app.models.gbm_forecast import ResidualGBMForecaster
+
     return ResidualGBMForecaster.train(load_prices())
 
 @router.get("/recommendation", response_model=RecommendationResponse)
@@ -40,4 +41,10 @@ def get_forecast(
     except ValueError as error:
         raise HTTPException(status_code=400, detail="target_time must be a valid date and time") from error
 
-    return get_forecaster().forecast(timestamp, window_hours)
+    try:
+        return get_forecaster().forecast(timestamp, window_hours)
+    except (ImportError, OSError, RuntimeError) as error:
+        print(f"Residual GBM unavailable; using seasonal fallback: {error}")
+        df = load_prices()
+        baseline = monthly_weekday_vs_weekend_baseline(df)
+        return forecast_window(timestamp, window_hours, baseline)
